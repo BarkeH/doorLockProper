@@ -1,0 +1,118 @@
+openapi: 3.0.0
+info:
+  title: "Flask Rest API"
+  description: "An API for the door lock"
+  version: "1.0.1"
+
+servers:
+  - url: "/api"
+
+paths:
+  /login:
+    post:
+      summary: "Return JWT token"
+      operationId: "app.login"
+      requestBody:
+        description: "User creds"
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - password
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+      responses:
+        "200":
+          description: "JWT Token"
+          content:
+            "text/plain":
+              schema:
+                type: "string"
+  /secret:
+    get:
+      summary: "Return secret string"
+      operationId: "app.get_secret"
+      responses:
+        "200":
+          description: "secret response"
+          content:
+            "text/plain":
+              schema:
+                type: "string"
+      security:
+      - jwt: ["secret"]
+  /train:
+    post:
+      operationId: "train.retrain"
+      tags:
+        - "door"
+      summary: "tells face recognition to retrain images"
+      responses:
+        "200":
+          description: "Succesfully trained"
+      security:
+      - jwt: ["secret"]
+  /unlock:
+    post:
+      operationId: "train.unlock"
+      tags: 
+        - "door"
+      summary: "tells the door to unlock"
+      responses:
+        "200":
+          description: "succesfully unlocked"
+      security:
+      - jwt: ["secret"]
+  /lock:
+    post:
+      operationId: "train.lock"
+      tags:
+        - "door"
+      summary: "tells the door to lock"
+      responses:
+        "200":
+          description: "succesfully locked"
+      security:
+      - jwt: ["secret"]
+  /camera:
+    post:
+      operationId: "train.getImage"
+      tags:
+        - "door"
+      responses:
+        "200":
+          description: "succesfully got photo"
+          content:
+            image/jpeg: {}
+      security:
+        - jwt: ["secret"]
+  /new/{name}:
+    post:
+      summary: "take photo for new user"
+      operationId: "train.newName"
+      parameters:
+        - name: "name"
+          in: "path"
+          description: "name to person"
+          required: true
+          schema:
+            type: "string"
+      responses:
+        "200":
+          description: "success"
+      security:
+      - jwt: ["secret"]
+
+components:
+  securitySchemes:
+    jwt:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      x-bearerInfoFunc: app.decode_token
